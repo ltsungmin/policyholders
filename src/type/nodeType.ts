@@ -13,3 +13,8 @@ export interface PolicyholderResponse {
 	l: Array<NodeData>;
 	r: Array<NodeData>;
 }
+
+export interface SelectedNodeState {
+	node: NodeData | null;
+	parentNode: NodeData | null;
+}

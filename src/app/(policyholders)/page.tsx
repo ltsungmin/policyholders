@@ -1,23 +1,48 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { SnackbarProvider } from "notistack";
 import * as d3 from "d3";
+import {
+	COLOR_ROOT,
+	COLOR_LINE,
+	COLOR_DIRECT,
+	COLOR_INDIRECT,
+} from "../../constants/theme";
 import Searchbar from "../../components/Searchbar";
 import NodeDialog from "../../components/NodeDialog";
-import { NodeData } from "../../type/nodeType";
+import {
+	NodeData,
+	PolicyholderResponse,
+	SelectedNodeState,
+} from "../../type/nodeType";
 
 export default function Home() {
 	const svgRef = useRef(null);
 	const [policyholderID, setPolicyholderID] = useState("");
 	const [isDialogOpen, setDialogOpen] = useState(false);
-	const [selectedNode, setSelectedNode] = useState<any | null>({
-		node: {},
-		parentNode: {},
+	const [selectedNode, setSelectedNode] = useState<SelectedNodeState>({
+		node: {
+			code: "",
+			name: "",
+			registration_date: 0,
+			introducer_code: "",
+		},
+		parentNode: {
+			code: "",
+			name: "",
+			registration_date: 0,
+			introducer_code: "",
+		},
 	});
 	const [policyholders, setPolicyholders] = useState(null);
 
 	// 將節點分配到二元樹中，從最左邊的節點開始分配
-	const distributeNodes = (root, nodes) => {
+	const distributeNodes = (
+		root: PolicyholderResponse,
+		nodes: PolicyholderResponse,
+	) => {
+		console.log(root, nodes);
 		if (!root) return null;
 
 		if (!Array.isArray(nodes) || nodes.length === 0) return root;
@@ -53,6 +78,7 @@ export default function Home() {
 
 	// 主函數：將數據轉換為二元樹
 	const convertToBinaryTree = (data) => {
+		console.log(data);
 		if (!data || typeof data !== "object") {
 			return null;
 		}
@@ -127,12 +153,11 @@ export default function Home() {
 			.join("path")
 			.attr("d", (d) => {
 				// 起始點 (父節點中心)
-				const sourceX = d.source.x;
-				const sourceY = d.source.y + yOffset;
+				const sourceX = d.source?.x ?? 0;
+				const sourceY = (d.source?.y ?? 0) + yOffset;
 
-				// 終點 (子節點中心)
-				const targetX = d.target.x;
-				const targetY = d.target.y + yOffset;
+				const targetX = d.target?.x ?? 0;
+				const targetY = (d.target?.y ?? 0) + yOffset;
 
 				// 分叉點的 Y 座標（垂直向下延伸的距離）
 				const midY = sourceY + (targetY - sourceY) / 2;
@@ -141,7 +166,7 @@ export default function Home() {
 				return `M ${sourceX},${sourceY} V ${midY} H ${targetX} V ${targetY}`;
 			})
 			.attr("fill", "none")
-			.attr("stroke", "#ccc")
+			.attr("stroke", COLOR_LINE)
 			.attr("stroke-width", 1.5);
 
 		// 繪製節點
@@ -149,7 +174,13 @@ export default function Home() {
 			.selectAll("g")
 			.data(root.descendants())
 			.join("g")
-			.attr("transform", (d) => `translate(${d.x},${d.y + yOffset})`)
+			.attr("transform", (d) => {
+				if (d.x === undefined || d.y === undefined) {
+					console.error("Node position is not defined", d);
+					return "translate(0,0)"; // 默认回退到原点
+				}
+				return `translate(${d.x},${d.y + yOffset})`;
+			})
 			.on("click", (_, d) => {
 				const currentNode = d.data;
 				const parentNode = d.parent ? d.parent.data : null;
@@ -166,11 +197,13 @@ export default function Home() {
 			.attr("x", -35) // 中心對齊 (寬度的一半)
 			.attr("y", -rectHeight / 2) // 中心對齊 (高度的一半)
 			.attr("fill", (d) => {
-				if (d.depth === 0) return "#ffe699"; // 根節點保持黃色
+				if (d.depth === 0) return COLOR_ROOT; // 根節點保持黃色
 				const rootCode = root.data.code;
 
 				// 判斷 introducer_code 是否匹配根節點的 code
-				return d.data.introducer_code === rootCode ? "#b6d7a7" : "#d3d3d3";
+				return d.data.introducer_code === rootCode
+					? COLOR_DIRECT
+					: COLOR_INDIRECT;
 			});
 
 		// 節點文字
@@ -192,21 +225,29 @@ export default function Home() {
 	}, [policyholders]);
 
 	return (
-		<div className="flex flex-col items-center min-h-screen p-5 gap-16 w-full h-full">
-			<Searchbar
-				policyholderID={policyholderID}
-				setPolicyholderID={setPolicyholderID}
-				setPolicyholders={setPolicyholders}
-			/>
-			<main className="flex flex-col gap-8 items-center justify-center w-full">
-				{policyholders ? <svg ref={svgRef}></svg> : ""}
-			</main>
-			<NodeDialog
-				isDialogOpen={isDialogOpen}
-				setDialogOpen={setDialogOpen}
-				selectedNode={selectedNode}
-				setPolicyholders={setPolicyholders}
-			/>
-		</div>
+		<SnackbarProvider
+			maxSnack={3}
+			anchorOrigin={{
+				vertical: "top",
+				horizontal: "right",
+			}}
+		>
+			<div className="flex flex-col items-center min-h-screen p-5 gap-16 w-full h-full">
+				<Searchbar
+					policyholderID={policyholderID}
+					setPolicyholderID={setPolicyholderID}
+					setPolicyholders={setPolicyholders}
+				/>
+				<main className="flex flex-col gap-8 items-center justify-center w-full">
+					{policyholders ? <svg ref={svgRef}></svg> : ""}
+				</main>
+				<NodeDialog
+					isDialogOpen={isDialogOpen}
+					setDialogOpen={setDialogOpen}
+					selectedNode={selectedNode}
+					setPolicyholders={setPolicyholders}
+				/>
+			</div>
+		</SnackbarProvider>
 	);
 }

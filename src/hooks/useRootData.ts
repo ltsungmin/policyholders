@@ -1,7 +1,10 @@
 import { useCallback } from "react";
 import axios from "axios";
+import { useSnackbar } from "notistack";
 
 export const useRootData = () => {
+	const { enqueueSnackbar } = useSnackbar();
+
 	const getRootData = useCallback(async (code: string) => {
 		try {
 			const response = await axios.get(`/api/policyholders`, {
@@ -11,9 +14,13 @@ export const useRootData = () => {
 			return response.data;
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
-				console.error(error.response?.data?.error || error.message);
+				enqueueSnackbar(error.response?.data?.error || error.message, {
+					variant: "error",
+				});
 			} else {
-				console.error("Unexpected Error:", error);
+				enqueueSnackbar(error, {
+					variant: "error",
+				});
 			}
 			return null;
 		}

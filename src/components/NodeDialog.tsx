@@ -1,6 +1,7 @@
 import React from "react";
 import axios from "axios";
 import dayjs from "dayjs";
+import { useSnackbar } from "notistack";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -10,24 +11,26 @@ import {
 } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useRootData } from "../hooks/useRootData";
+import { NodeData } from "../type/nodeType";
 
 function NodeDialog({
 	isDialogOpen = false,
 	setDialogOpen,
-	selectedNode = {},
+	selectedNode = null,
 	setPolicyholders = null,
 }: {
 	isDialogOpen: boolean;
 	setDialogOpen: (open: boolean) => void;
-	selectedNode?: any;
+	selectedNode?: NodeData | null;
 	setPolicyholders: any;
 }) {
+	const { enqueueSnackbar } = useSnackbar();
 	const { getRootData } = useRootData();
 	const { node, parentNode } = selectedNode;
 	const milliseconds = (node?.registration_date ?? 0) * 1000;
 
-	const getTopNodeDate = (code: string) => {
-		getTopNodeData(code).then((data) => setPolicyholders(data));
+	const getTopNodeDate = async (code: string) => {
+		await getTopNodeData(code).then((data) => setPolicyholders(data));
 		setDialogOpen(false);
 	};
 
@@ -39,12 +42,17 @@ function NodeDialog({
 	const getTopNodeData = async (code: string) => {
 		try {
 			const response = await axios.get(`/api/policyholders/${code}/top`);
+
 			return response.data;
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
-				console.error(error.response?.data?.error || error.message);
+				enqueueSnackbar(error.response?.data?.error || error.message, {
+					variant: "error",
+				});
 			} else {
-				console.error("Unexpected Error:", error);
+				enqueueSnackbar("Unexpected Error: " + error, {
+					variant: "error",
+				});
 			}
 		}
 	};
