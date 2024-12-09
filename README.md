@@ -18,6 +18,7 @@
 - 使用 TypeScript
 - D3.js 渲染樹狀結構
 - Shadcn UI Library
+- Tailwind 處理樣式
 - eslint, prettier, eslint 統一程式碼風格
 - API Routes 創建 Mock API
 
