@@ -1,0 +1,24 @@
+{
+	"extends": [
+		"react-app",
+		"react-app/jest",
+		"plugin:@typescript-eslint/recommended",
+		"plugin:react/recommended",
+		"eslint:recommended"
+	],
+	"parser": "@typescript-eslint/parser",
+	"plugins": ["@typescript-eslint", "react"],
+	"rules": {
+		"quotes": ["warn", "double"],
+		"react/react-in-jsx-scope": "off",
+		"no-unused-vars": "error",
+		"@typescript-eslint/no-unused-vars": "warn",
+		"@typescript-eslint/explicit-module-boundary-types": "off",
+		"react/prop-types": "off"
+	},
+	"settings": {
+		"react": {
+			"version": "detect"
+		}
+	}
+}
