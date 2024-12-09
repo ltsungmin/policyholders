@@ -16,12 +16,12 @@ import { NodeData } from "../type/nodeType";
 function NodeDialog({
 	isDialogOpen = false,
 	setDialogOpen,
-	selectedNode = null,
+	selectedNode,
 	setPolicyholders = null,
 }: {
 	isDialogOpen: boolean;
 	setDialogOpen: (open: boolean) => void;
-	selectedNode?: NodeData | null;
+	selectedNode?: NodeData | any;
 	setPolicyholders: any;
 }) {
 	const { enqueueSnackbar } = useSnackbar();

@@ -36,6 +36,7 @@ export default function Home() {
 		},
 	});
 	const [policyholders, setPolicyholders] = useState(null);
+	const [isClient, setIsClient] = useState(false);
 
 	// 將節點分配到二元樹中，從最左邊的節點開始分配
 	const distributeNodes = (
@@ -77,8 +78,7 @@ export default function Home() {
 	};
 
 	// 主函數：將數據轉換為二元樹
-	const convertToBinaryTree = (data) => {
-		console.log(data);
+	const convertToBinaryTree = (data: any) => {
 		if (!data || typeof data !== "object") {
 			return null;
 		}
@@ -119,6 +119,10 @@ export default function Home() {
 		});
 		setDialogOpen(true);
 	};
+
+	useEffect(() => {
+		setIsClient(true);
+	}, []);
 
 	useEffect(() => {
 		const width = 1500;

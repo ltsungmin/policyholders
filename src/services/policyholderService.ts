@@ -5,13 +5,15 @@ export const buildTreeService = (data: any, rootCode: string) => {
 	if (!root) return null;
 
 	const directChildren = data.filter(
-		(item: NodeData) => item.introducer_code === rootCode && item.code !== rootCode,
+		(item: NodeData) =>
+			item.introducer_code === rootCode && item.code !== rootCode,
 	);
 	const indirectChildren: NodeData[] = [];
 
 	directChildren.forEach((child: NodeData) => {
 		const indirect = data.filter(
-			(item: NodeData) => item.introducer_code === child.code && item.code !== rootCode,
+			(item: NodeData) =>
+				item.introducer_code === child.code && item.code !== rootCode,
 		);
 		indirectChildren.push(...indirect);
 	});
