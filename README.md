@@ -48,7 +48,7 @@ yarn install
 啟動服務
 
 ```bash
-pnpm start
+pnpm run dev
 # or
-yarn start
+yarn run dev
 ```
